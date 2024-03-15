@@ -16,14 +16,19 @@ class UserController extends Controller
 
         $users = $em->getRepository('EMMUserBundle:User')->findAll();
 
+        /*
+
         $res = 'Lista de usuarios: <br />';
 
         foreach ($users as $user) {
             $res .= 'Usuario: ' . $user->getUsername() . ' - Email: ' . $user->getEmail() . '<br />';
         }
 
+        return new Response($res);
+
+        */
+
         return $this->render('EMMUserBundle:User:index.html.twig', array('users' => $users));
-        //return new Response($res);
     }
 
     public function viewAction($id)
