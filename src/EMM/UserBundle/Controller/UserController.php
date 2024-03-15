@@ -22,7 +22,8 @@ class UserController extends Controller
             $res .= 'Usuario: ' . $user->getUsername() . ' - Email: ' . $user->getEmail() . '<br />';
         }
 
-        return new Response($res);
+        return $this->render('EMMUserBundle:User:index.html.twig', array('users' => $users));
+        //return new Response($res);
     }
 
     public function viewAction($id)
