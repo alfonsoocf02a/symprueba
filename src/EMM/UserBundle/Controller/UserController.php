@@ -3,18 +3,23 @@
 namespace EMM\UserBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
+    /**
+     * Función para mostrar el listado de usuario
+     * @return Response 
+     */
     public function indexAction()
     {
 
         //return new Response('Bienvenido a mi módulo de usuarios');
 
-        $em = $this->getDoctrine()->getManager();
+        //$em = $this->getDoctrine()->getManager();
 
-        $users = $em->getRepository('EMMUserBundle:User')->findAll();
+        //$users = $em->getRepository('EMMUserBundle:User')->findAll();
 
         /*
 
@@ -27,6 +32,11 @@ class UserController extends Controller
         return new Response($res);
 
         */
+
+
+        //Usando mi controlador personalizado
+        $userManager = $this->get('emm.user_bundle.user_manager');
+        $users = $userManager->findInActiveUsers();
 
         return $this->render('EMMUserBundle:User:index.html.twig', array('users' => $users));
     }
