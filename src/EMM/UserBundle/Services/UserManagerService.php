@@ -10,49 +10,22 @@ class UserManagerService
 {
     private $em;
     private $userRepository;
+    private $translator;
 
     /**
      * Constructor para obtener el repo
      */
-    public function __construct(EntityManager $em)
+    public function __construct(EntityManager $em, $translator)
     {
         $this->em = $em;
         $this->userRepository = $em->getRepository('EMMUserBundle:User');
+        $this->translator = $translator;
     }
 
     /**
      * Función para ver los usuarios inactivos
      */
     public function findInActiveUsers()
-    {
-        return $this->userRepository->findAll();
-        //return $this->userRepository->findBy(['isActive' => false]);
-
-
-
-
-    }
-
-
-    /**
-     * Función para guardar los usuarios
-     * @param User $user        Entidad User
-     * @param bool $doFlush     Bandera para determinar si se hace flush o no
-     * 
-     * @return void
-     * @author 
-     */
-    public function saveUser(User $user, bool $doFlush)
-    {
-        $this->em->persist($user);
-
-        if ($doFlush) {
-            $this->em->flush();
-        }
-    }
-
-    /*
-    public function getUsers()
     {
 
         $result = array(
@@ -81,5 +54,22 @@ class UserManagerService
             'data'          => $users
         );
     }
-    */
+
+
+    /**
+     * Función para guardar los usuarios
+     * @param User $user        Entidad User
+     * @param bool $doFlush     Bandera para determinar si se hace flush o no
+     * 
+     * @return void
+     * @author 
+     */
+    public function saveUser(User $user, bool $doFlush)
+    {
+        $this->em->persist($user);
+
+        if ($doFlush) {
+            $this->em->flush();
+        }
+    }
 }
