@@ -8,6 +8,10 @@ app:
     
 emm_user_index:
     path:       /user/index
+    defaults: { _controller: EMMUserBundle:User:renderindex }
+
+emm_user_index_data:
+    path:       /user/indexData
     defaults: { _controller: EMMUserBundle:User:index }
 
 emm_user_add:

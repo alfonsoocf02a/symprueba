@@ -15,34 +15,32 @@ class UserController extends Controller
      * Función para mostrar el listado de usuario
      * @return Response 
      */
-    public function indexAction()
+    // UserController.php
+
+    public function renderindexAction(Request $request)
     {
 
-        //return new Response('Bienvenido a mi módulo de usuarios');
-
-        //$em = $this->getDoctrine()->getManager();
-
-        //$users = $em->getRepository('EMMUserBundle:User')->findAll();
-
-        /*
-
-        $res = 'Lista de usuarios: <br />';
-
-        foreach ($users as $user) {
-            $res .= 'Usuario: ' . $user->getUsername() . ' - Email: ' . $user->getEmail() . '<br />';
-        }
-
-        return new Response($res);
-
-        */
-
-
-        //Usando mi controlador
         $userManager = $this->get('emm.user_bundle.user_manager_service');
-        $users = $userManager->findInActiveUsers();
-
-        return $this->render('EMMUserBundle:User:index.html.twig', array('users' => $users['data']));
+        return $this->render('EMMUserBundle:User:index.html.twig');
     }
+
+    public function indexAction(Request $request)
+    {
+
+        $userManager = $this->get('emm.user_bundle.user_manager_service');
+
+        $params = $request->request->all();
+
+        //Recogemos los filtros en un array
+        $form_filt = $request->request->get('form_filters');
+        $form_filters = [];
+        parse_str($form_filt, $form_filters);
+
+        //Obtenemos la información de los clientes
+        $users = $userManager->findInActiveUsers($params, $form_filters);
+        return new JsonResponse($users);
+    }
+
 
     public function getUsersAction(Request $request)
     {

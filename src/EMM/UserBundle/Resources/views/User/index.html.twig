@@ -2,16 +2,16 @@
 
 {% block body %}
     {{ parent() }}
-	{{ include('EMMUserBundle:User:messages/success.html.twig') }}
-	<div class="container">
-		<div class="col-md-12">
-			<div class="page-header margin-none">
-				<h2 class="padding-none">{% trans %} Users {% endtrans %}</h2>
-			</div>
-			<div class="table-responsive">
-				<table class="table table-striped table-hover">
-					<thead>
-						<tr>
+    {{ include('EMMUserBundle:User:messages/success.html.twig') }}
+    <div class="container">
+        <div class="col-md-12">
+            <div class="page-header margin-none">
+                <h2 class="padding-none">{% trans %} Users {% endtrans %}</h2>
+            </div>
+            <div class="table-responsive">
+                <table id="usersTable" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
                             <th>Username</th>
                             <th>First name</th>
                             <th>Last name</th>
@@ -20,42 +20,87 @@
                             <th>Created</th>
                             <th>Updated</th>
                             <th>Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-				        {% for user in users %}
-                            <tr>
-                                <td>{{ user.username }}</td>
-                                <td>{{ user.firstName }}</td>
-                                <td>{{ user.lastName }}</td>
-                                <td>{{ user.email }}</td>
-                                <td>
-                                    {% if user.role == 'ROLE_ADMIN' %}
-                                        {% trans %} Administrator {% endtrans %}
-                                    {% elseif user.role == 'ROLE_USER' %}
-                                        {% trans %} User {% endtrans %}
-                                    {% endif %}
-                                </td>
-                                <td>{{ user.createdAt|date('d-m-Y H:i') }}</td>
-                                <td>{{ user.updatedAt|date('d-m-Y H:i') }}</td>
-				                <td class="actions">
-			                        <a href="#" class="btn btn-sm btn-info">
-			                            {{ 'View'|trans }}
-			                        </a>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Contenido llenado por DataTables -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
 
-			                        <a href="#" class="btn btn-sm btn-primary">
-			                            {{ 'Edit'|trans }}
-			                        </a>
-
-			                        <a href="#" class="btn btn-sm btn-danger btn-delete">
-			                            {{ 'Delete'|trans }}
-			                        </a>
-				                </td>
-                            </tr>
-				        {% endfor %}
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(document).ready(function() {
+            $('#usersTable').DataTable({
+                dom: 'Blrtip',
+                order: [[0, 'asc']],
+                searching: false,
+                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ 'Todos'|trans }}"]],
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        orientation: 'landscape',
+                        pageSize: 'LEGAL',
+                    },
+                ],
+                rowId: 'idRow',
+                responsive: true,
+                autoWidth: true,
+                processing: true,
+                serverSide: true,
+                pagingType: "full_numbers",
+                language: {
+                    sProcessing: "{{ 'Procesando...'|trans }}",
+                    sLengthMenu: "{{ 'Mostrar _MENU_ registros'|trans }}",
+                    sZeroRecords: "{{ 'No se encontraron resultados'|trans }}",
+                    sEmptyTable: "{{ 'Ningún dato disponible en esta tabla'|trans }}",
+                    sInfo: "{{ 'Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros'|trans }}",
+                    sInfoEmpty: "{{ 'Mostrando registros del 0 al 0 de un total de 0 registros'|trans }}",
+                    sInfoFiltered: "{{ '(filtrado de un total de _MAX_ registros)'|trans }}",
+                    sSearch: "{{ 'Buscar:'|trans }}",
+                    oPaginate: {
+                        sFirst: "{{ 'Primero'|trans }}",
+                        sLast: "{{ 'Último'|trans }}",
+                        sNext: "{{ 'Siguiente'|trans }}",
+                        sPrevious: "{{ 'Anterior'|trans }}",
+                    },
+                    oAria: {
+                        sSortAscending: "{{ ': Activar para ordenar la columna de manera ascendente'|trans }}",
+                        sSortDescending: "{{ ': Activar para ordenar la columna de manera descendente'|trans }}"
+                    },
+                },
+                ajax: {
+                    url: "{{ path('emm_user_index_data') }}",
+                    method: 'POST',
+                    data: function (d) {
+                        // Aquí puedes añadir datos adicionales si es necesario
+                    }
+                },
+                columns: [
+                    { data: 'username' },
+                    { data: 'firstName' },
+                    { data: 'lastName' },
+                    { data: 'email' },
+                    { data: 'role' },
+                    { data: 'createdAt' },
+                    { data: 'updatedAt' },
+                    // Las acciones no se pasan por AJAX, se renderizan en el servidor o en un método 'render' aquí.
+                    { data: 'actions', orderable: false, searchable: false, render: function(data, type, full, meta) {
+                        // Renderiza tus botones de acción aquí usando `full` que contiene todos los datos de la fila
+                        return "<a href='#' class='btn btn-sm btn-info'>View</a> <a href='#' class='btn btn-sm btn-primary'>Edit</a> <a href='#' class='btn btn-sm btn-danger btn-delete'>Delete</a>";
+                    } }
+                ],
+                initComplete: function () {
+                    // Aquí puedes escribir código que se ejecutará una vez que la tabla haya terminado de cargarse
+                }
+            });
+        });
+    </script>
 {% endblock %}
