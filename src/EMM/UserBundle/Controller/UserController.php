@@ -114,6 +114,9 @@ class UserController extends Controller
             $userManager = $this->get('emm.user_bundle.user_manager_service');
             $userManager->saveUser($user);
 
+            $successMessage = $this->get('translator')->trans('The user has been created.');
+            $this->addFlash('mensaje', $successMessage);
+
             return $this->redirectToRoute('emm_user_index');
         }
 
