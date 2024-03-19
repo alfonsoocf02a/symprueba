@@ -64,12 +64,12 @@ class UserManagerService
      * @return void
      * @author 
      */
-    public function saveUser(User $user, bool $doFlush)
+    public function saveUser(User $user)
     {
         $this->em->persist($user);
 
-        if ($doFlush) {
-            $this->em->flush();
-        }
+        // Hacer que el flush solo se haga al final de todo para evitar
+        // llenar el buffer. En este caso lo dejo así por que solo se inserta uno
+        $this->em->flush();
     }
 }

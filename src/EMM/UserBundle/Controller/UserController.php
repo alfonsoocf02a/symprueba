@@ -111,7 +111,7 @@ class UserController extends Controller
             //$em->flush();
 
             //Usando mi controlador personalizado
-            $userManager = $this->get('emm.user_bundle.user_manager');
+            $userManager = $this->get('emm.user_bundle.user_manager_service');
             $userManager->saveUser($user);
 
             return $this->redirectToRoute('emm_user_index');

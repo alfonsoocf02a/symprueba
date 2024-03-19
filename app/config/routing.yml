@@ -5,7 +5,7 @@ emm_user:
 app:
     resource: '@AppBundle/Controller/'
     type: annotation
-
+    
 emm_user_index:
     path:       /user/index
     defaults: { _controller: EMMUserBundle:User:index }
@@ -13,7 +13,7 @@ emm_user_index:
 emm_user_add:
     path:     /user/add
     defaults: { _controller: EMMUserBundle:User:add }
-
+    
 emm_user_create:
     path:     /user/create
     defaults: { _controller: EMMUserBundle:User:create }
@@ -30,3 +30,10 @@ emm_user_view:
 emm_user_delete:
     path:     /user/delete/{id}
     defaults: { _controller: EMMUserBundle:User:delete }
+    
+emm_user_redirect_add:
+    path: /user/create
+    defaults:
+        _controller: EMMUserBundle:User:add
+        path: /user/add
+        permanent: true
