@@ -38,7 +38,7 @@ class UserController extends Controller
 
 
         //Usando mi controlador
-        $userManager = $this->get('emm.user_bundle.user_manager');
+        $userManager = $this->get('emm.user_bundle.user_manager_service');
         $users = $userManager->findInActiveUsers();
 
         return $this->render('EMMUserBundle:User:index.html.twig', array('users' => $users));

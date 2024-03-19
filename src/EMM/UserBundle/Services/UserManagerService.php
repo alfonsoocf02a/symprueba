@@ -6,7 +6,7 @@ namespace EMM\UserBundle\Services;
 use Doctrine\ORM\EntityManager;
 use EMM\UserBundle\Entity\User;
 
-class UserManager
+class UserManagerService
 {
     private $em;
     private $userRepository;
@@ -25,8 +25,12 @@ class UserManager
      */
     public function findInActiveUsers()
     {
-        //return $this->userRepository->findAll();
-        return $this->userRepository->findBy(['isActive' => false]);
+        return $this->userRepository->findAll();
+        //return $this->userRepository->findBy(['isActive' => false]);
+
+
+
+
     }
 
 
@@ -47,6 +51,7 @@ class UserManager
         }
     }
 
+    /*
     public function getUsers()
     {
 
@@ -76,4 +81,5 @@ class UserManager
             'data'          => $users
         );
     }
+    */
 }
