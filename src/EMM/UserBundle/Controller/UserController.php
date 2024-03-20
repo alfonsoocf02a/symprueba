@@ -45,17 +45,6 @@ class UserController extends Controller
     }
 
 
-    public function getUsersAction(Request $request)
-    {
-
-        $users = $this->get('user_service')->getAll();
-
-        return new JsonResponse(
-            $users['data'],
-            $users['statusCode']
-        );
-    }
-
     /**
      * Función para añadir usuario
      * @return Response 
@@ -69,7 +58,7 @@ class UserController extends Controller
     }
 
     /**
-     * Función para crear un formulario
+     * Función para crear un formulario (para añadir un usuario)
      * @return mixed
      */
     private function createCreateForm(User $entity)
@@ -83,7 +72,7 @@ class UserController extends Controller
     }
 
     /**
-     * Función validar y persistir un usuario
+     * Función validar y persistir la creacion de un usuario a partir de una request del formulario
      * @return mixed
      */
     public function createAction(Request $request)
@@ -133,20 +122,25 @@ class UserController extends Controller
         return $this->render('EMMUserBundle:User:add.html.twig', array('form' => $form->createView()));
     }
 
-    public function editAction($id)
+    public function editAction($id) //Lo llamo desde la vista
     {
-        $em = $this->getDoctrine()->getManager();
-        $user = $em->getRepository('EMMUserBundle:User')->find($id);
-
         //Usando mi controlador personalizado
         $userManager = $this->get('emm.user_bundle.user_manager_service');
-        $userManager->saveUser($user);
+        $userResponse = $userManager->getUser($id);
+
+        if ($userResponse['status'] == false) {
+            $messageException = json_encode($userResponse['message']);
+            throw $this->createNotFoundException($messageException);
+        }
+
+        $user = $userResponse['data'];
 
         if (!$user) {
             $messageException = $this->get('translator')->trans('User not found.');
             throw $this->createNotFoundException($messageException);
         }
 
+        //Creamos y renderizamos el formulario de edicion con los datos del usuario
         $form = $this->createEditForm($user);
 
         return $this->render('EMMUserBundle:User:edit.html.twig', array('user' => $user, 'form' => $form->createView()));
@@ -154,6 +148,7 @@ class UserController extends Controller
 
     private function createEditForm(User $entity)
     {
+        //Cuando submit, llama a updateAction
         $form = $this->createForm(new UserType(), $entity, array('action' => $this->generateUrl('emm_user_update', array('id' => $entity->getId())), 'method' => 'PUT'));
 
         return $form;
@@ -161,21 +156,27 @@ class UserController extends Controller
 
     public function updateAction($id, Request $request)
     {
+
+        //Obtenemos los datos del user que quermos modificar
+
         $em = $this->getDoctrine()->getManager();
 
-        $user = $em->getRepository('EMMUserBundle:User')->find($id);
 
-        //Usando mi controlador personalizado
-        //$userManager = $this->get('emm.user_bundle.user_manager_service');
-        //$user = $userManager->getUser($id);
+        //Usando mi controlador personalizado obtenemos los datos del usuario
+        $userManager = $this->get('emm.user_bundle.user_manager_service');
+        $userResponse = $userManager->getUser($id);
 
-        if (!$user) {
-            $messageException = $this->get('translator')->trans('User not found.');
+        if ($userResponse['status'] == false) {
+            $messageException = json_encode($userResponse['message']);
             throw $this->createNotFoundException($messageException);
         }
 
+        $user = $userResponse['data'];
+
+        //Obtenemos los datos de la respuesta del formulario recibodo
         $form = $this->createEditForm($user);
         $form->handleRequest($request);
+
 
         if ($form->isSubmitted() && $form->isValid()) {
             $password = $form->get('password')->getData();
@@ -196,21 +197,24 @@ class UserController extends Controller
 
             $successMessage = $this->get('translator')->trans('The user has been modified.');
             $this->addFlash('mensaje', $successMessage);
-            return $this->redirectToRoute('emm_user_edit', array('id' => $user->getId()));
+            return $this->redirectToRoute('emm_user_index', array('id' => $user->getId()));
         }
         return $this->render('EMMUserBundle:User:edit.html.twig', array('user' => $user, 'form' => $form->createView()));
     }
 
     private function recoverPass($id)
     {
-        $em = $this->getDoctrine()->getManager();
-        $query = $em->createQuery(
-            'SELECT u.password
-            FROM EMMUserBundle:User u
-            WHERE u.id = :id'
-        )->setParameter('id', $id);
 
-        $currentPass = $query->getResult();
+        //Obtenemos el pass
+        $userManager = $this->get('emm.user_bundle.user_manager_service');
+        $userResponse = $userManager->getPass($id);
+
+        if ($userResponse['status'] == false) {
+            $messageException = json_encode($userResponse['message']);
+            throw $this->createNotFoundException($messageException);
+        }
+
+        $currentPass = $userResponse['data'];
 
         return $currentPass;
     }

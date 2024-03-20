@@ -6,6 +6,7 @@ namespace EMM\UserBundle\Services;
 use Doctrine\ORM\EntityManager;
 use EMM\UserBundle\Entity\User;
 use EMM\UserBundle\Entity\UserRepository;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserManagerService
 {
@@ -129,13 +130,13 @@ class UserManagerService
         );
 
         try {
-            $users = $this->userRepository->find($id);
+            $user = $this->userRepository->find($id);
         } catch (\Throwable $th) {
             $result['message'] = $this->translator->trans('Ha ocurrido un error');
             return $result;
         }
 
-        if (empty($users)) {
+        if (empty($user)) {
             $result['message'] = $this->translator->trans('No se han podido obtener usuarios');
             return $result;
         }
@@ -144,7 +145,75 @@ class UserManagerService
             'status'        => true,
             'statusCode'    => 200,
             'message'       => $this->translator->trans('Se ha realizado correctamente'),
-            'data'          => $users
+            'data'          => $user
         );
+    }
+
+    public function getPass($id)
+    {
+
+        $result = array(
+            'status'        => false,
+            'statusCode'    => 401,
+            'message'       => $this->translator->trans('No se ha podido realizar la acción'),
+            'data'          => array()
+        );
+
+        try {
+            $queryBuilder = $this->em->createQueryBuilder();
+            $qryres = $queryBuilder
+                ->select('u.password')
+                ->from('EMMUserBundle:User', 'u')
+                ->where('u.id = :id')
+                ->setParameter('id', $id)
+                ->getQuery();
+            $pass = $qryres->getResult();
+        } catch (\Throwable $th) {
+            $result['message'] = $this->translator->trans('Ha ocurrido un error con la consulta');
+            return $result;
+        }
+
+
+        if (empty($pass)) {
+            $result['message'] = $this->translator->trans('No se han podido obtener usuarios');
+            return $result;
+        }
+
+        return array(
+            'status'        => true,
+            'statusCode'    => 200,
+            'message'       => $this->translator->trans('Se ha realizado correctamente'),
+            'data'          => $pass
+        );
+    }
+
+    public function updateUser($id)
+    {
+
+
+
+        // userService->update()
+        $userManager = $this->get('emm.user_bundle.user_manager_service');
+        $userResponse = $userManager->updateUser($id, $request);
+        // private function getUser();
+        // private function createForm(User $user);
+
+        try {
+            $updateResult = $userService->update($id);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+
+        if (!$updateResult['status']) {
+            $this->addFlash('mensaje', $updateResult['message']);
+            return $this->render('EMMUserBundle:User:edit.html.twig', array(
+                'user' => $user,
+                'form' => $form->createView()
+            ));
+        }
+
+        return $this->redirectToRoute('emm_user_index', array(
+            'id' => $updateResult['data']->getId()
+        ));
     }
 }
