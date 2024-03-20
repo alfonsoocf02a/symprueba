@@ -34,12 +34,16 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
+
+        // Define la base de la URL y las traducciones necesarias
+        var baseUrlEdit = "{{ path('emm_user_edit', {'id': 'PLACEHOLDER'}) }}";
+
         $(document).ready(function() {
             $('#usersTable').DataTable({
                 dom: 'Blrtip',
                 order: [[0, 'asc']],
                 searching: false,
-                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ 'Todos'|trans }}"]],
+                lengthMenu: [[5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, "{{ 'Todos'|trans }}"]],
                 buttons: [
                     {
                         extend: 'excelHtml5',
@@ -92,15 +96,34 @@
                     { data: 'createdAt' },
                     { data: 'updatedAt' },
                     // Las acciones no se pasan por AJAX, se renderizan en el servidor o en un método 'render' aquí.
-                    { data: 'actions', orderable: false, searchable: false, render: function(data, type, full, meta) {
-                        // Renderiza tus botones de acción aquí usando `full` que contiene todos los datos de la fila
-                        return "<a href='#' class='btn btn-sm btn-info'>View</a> <a href='#' class='btn btn-sm btn-primary'>Edit</a> <a href='#' class='btn btn-sm btn-danger btn-delete'>Delete</a>";
-                    } }
+                    {
+                        data: 'actions',
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, full, meta) {
+                            // Asegúrate de que la base URL está definida en algún lugar accesible del script.
+                            // Por ejemplo, definida globalmente o dentro de este bloque de script.
+                            // FULL CONTIENE TODOS LOS DATOS DE LAFINAL
+                            
+                            // Reemplaza 'full.id' por el campo adecuado si es necesario.
+                            var editUrl = baseUrlEdit.replace("PLACEHOLDER", full.id);
+
+                            return generateActionButtons(editUrl);
+                        }
+                    }
                 ],
                 initComplete: function () {
                     // Aquí puedes escribir código que se ejecutará una vez que la tabla haya terminado de cargarse
                 }
             });
         });
+
+        function generateActionButtons(editUrl) {
+            // Construye y retorna la cadena HTML para los botones de acción
+            return "<a href='#' class='btn btn-sm btn-info'>View</a>" + 
+                "<a href='" + editUrl + "' class='btn btn-sm btn-primary'>Edit</a>" + 
+                "<a href='#' class='btn btn-sm btn-danger btn-delete'>Delete</a>";
+        }
+
     </script>
 {% endblock %}

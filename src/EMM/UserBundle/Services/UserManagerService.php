@@ -79,6 +79,7 @@ class UserManagerService
 
         $data = array_map(function ($user) {
             return [
+                'id' => $user->getId(),
                 'username' => $user->getUsername(),
                 'firstName' => $user->getFirstName(),
                 'lastName' => $user->getLastName(),
@@ -114,5 +115,36 @@ class UserManagerService
         // Hacer que el flush solo se haga al final de todo para evitar
         // llenar el buffer. En este caso lo dejo así por que solo se inserta uno
         $this->em->flush();
+    }
+
+
+    public function getUser($id)
+    {
+
+        $result = array(
+            'status'        => false,
+            'statusCode'    => 401,
+            'message'       => $this->translator->trans('No se ha podido realizar la acción'),
+            'data'          => array()
+        );
+
+        try {
+            $users = $this->userRepository->find($id);
+        } catch (\Throwable $th) {
+            $result['message'] = $this->translator->trans('Ha ocurrido un error');
+            return $result;
+        }
+
+        if (empty($users)) {
+            $result['message'] = $this->translator->trans('No se han podido obtener usuarios');
+            return $result;
+        }
+
+        return array(
+            'status'        => true,
+            'statusCode'    => 200,
+            'message'       => $this->translator->trans('Se ha realizado correctamente'),
+            'data'          => $users
+        );
     }
 }
