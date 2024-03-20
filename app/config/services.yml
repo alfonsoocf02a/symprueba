@@ -10,4 +10,4 @@ services:
 
     emm.user_bundle.user_manager_service:
         class: EMM\UserBundle\Services\UserManagerService
-        arguments: ['@doctrine.orm.entity_manager', '@translator']
+        arguments: ['@doctrine.orm.entity_manager', '@translator', '@security.password_encoder']

@@ -22,8 +22,6 @@ class UserController extends Controller
 
     public function renderindexAction(Request $request)
     {
-
-        $userManager = $this->get('emm.user_bundle.user_manager_service');
         return $this->render('EMMUserBundle:User:index.html.twig');
     }
 
@@ -157,12 +155,7 @@ class UserController extends Controller
     public function updateAction($id, Request $request)
     {
 
-        //Obtenemos los datos del user que quermos modificar
 
-        $em = $this->getDoctrine()->getManager();
-
-
-        //Usando mi controlador personalizado obtenemos los datos del usuario
         $userManager = $this->get('emm.user_bundle.user_manager_service');
         $userResponse = $userManager->getUser($id);
 
@@ -177,45 +170,16 @@ class UserController extends Controller
         $form = $this->createEditForm($user);
         $form->handleRequest($request);
 
+        try {
+            $ResponseGeneral = $userManager->updateUser($id, $form);
+        } catch (\Throwable $th) {
+            throw new \Exception("Error haciendo la actualización");
+        }
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $password = $form->get('password')->getData();
-            if (!empty($password)) {
-                $encoder = $this->container->get('security.password_encoder');
-                $encoded = $encoder->encodePassword($user, $password);
-                $user->setPassword($encoded);
-            } else {
-                $recoverPass = $this->recoverPass($id);
-                $user->setPassword($recoverPass[0]['password']);
-            }
-
-            if ($form->get('role')->getData() == 'ROLE_ADMIN') {
-                $user->setIsActive(1);
-            }
-
-            $em->flush();
-
-            $successMessage = $this->get('translator')->trans('The user has been modified.');
-            $this->addFlash('mensaje', $successMessage);
+        if ($ResponseGeneral['status'] == true) {
+            $this->addFlash('mensaje', $ResponseGeneral['message']);
             return $this->redirectToRoute('emm_user_index', array('id' => $user->getId()));
         }
         return $this->render('EMMUserBundle:User:edit.html.twig', array('user' => $user, 'form' => $form->createView()));
-    }
-
-    private function recoverPass($id)
-    {
-
-        //Obtenemos el pass
-        $userManager = $this->get('emm.user_bundle.user_manager_service');
-        $userResponse = $userManager->getPass($id);
-
-        if ($userResponse['status'] == false) {
-            $messageException = json_encode($userResponse['message']);
-            throw $this->createNotFoundException($messageException);
-        }
-
-        $currentPass = $userResponse['data'];
-
-        return $currentPass;
     }
 }

@@ -8,20 +8,23 @@ use EMM\UserBundle\Entity\User;
 use EMM\UserBundle\Entity\UserRepository;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
+
 class UserManagerService
 {
     private $em;
     private $userRepository;
     private $translator;
+    private $passwordEncoder;
 
     /**
      * Constructor para obtener el repo
      */
-    public function __construct(EntityManager $em, $translator)
+    public function __construct(EntityManager $em, $translator, UserPasswordEncoderInterface $passwordEncoder)
     {
         $this->em = $em;
         $this->userRepository = $em->getRepository('EMMUserBundle:User');
         $this->translator = $translator;
+        $this->passwordEncoder = $passwordEncoder;
     }
 
     /**
@@ -187,33 +190,66 @@ class UserManagerService
         );
     }
 
-    public function updateUser($id)
+    public function updateUser($id, $form)
     {
 
 
+        $result = array(
+            'status'        => false,
+            'statusCode'    => 401,
+            'message'       => $this->translator->trans('No se ha podido realizar la acción'),
+            'data'          => array()
+        );
 
-        // userService->update()
-        $userManager = $this->get('emm.user_bundle.user_manager_service');
-        $userResponse = $userManager->updateUser($id, $request);
-        // private function getUser();
-        // private function createForm(User $user);
 
-        try {
-            $updateResult = $userService->update($id);
-        } catch (\Throwable $th) {
-            //throw $th;
+        $userResponse = $this->getUser($id);
+
+        if ($userResponse['status'] == false) {
+            $messageException = json_encode($userResponse['message']);
+            throw new \Exception($messageException);
         }
 
-        if (!$updateResult['status']) {
-            $this->addFlash('mensaje', $updateResult['message']);
-            return $this->render('EMMUserBundle:User:edit.html.twig', array(
-                'user' => $user,
-                'form' => $form->createView()
-            ));
+        $user = $userResponse['data'];
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $password = $form->get('password')->getData();
+            if (!empty($password)) {
+                $encoded = $this->passwordEncoder->encodePassword($user, $password);
+                $user->setPassword($encoded);
+            } else {
+                $recoverPass = $this->recoverPass($id);
+                $user->setPassword($recoverPass[0]['password']);
+            }
+
+            if ($form->get('role')->getData() == 'ROLE_ADMIN') {
+                $user->setIsActive(1);
+            }
+
+            $this->em->flush();
+
+            return array(
+                'status'        => true,
+                'statusCode'    => 200,
+                'message'       => $this->translator->trans('Se ha modificao el usuario correctamente'),
+                'data'          => array()
+            );
+        }
+    }
+
+
+    private function recoverPass($id)
+    {
+
+        //Obtenemos el pass
+        $userResponse = $this->getPass($id);
+
+        if ($userResponse['status'] == false) {
+            $messageException = json_encode($userResponse['message']);
+            throw new \Exception($messageException);
         }
 
-        return $this->redirectToRoute('emm_user_index', array(
-            'id' => $updateResult['data']->getId()
-        ));
+        $currentPass = $userResponse['data'];
+
+        return $currentPass;
     }
 }
