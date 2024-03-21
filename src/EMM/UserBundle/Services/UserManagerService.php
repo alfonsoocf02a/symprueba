@@ -192,8 +192,6 @@ class UserManagerService
 
     public function updateUser($id, $form)
     {
-
-
         $result = array(
             'status'        => false,
             'statusCode'    => 401,
@@ -201,12 +199,11 @@ class UserManagerService
             'data'          => array()
         );
 
-
         $userResponse = $this->getUser($id);
 
         if ($userResponse['status'] == false) {
-            $messageException = json_encode($userResponse['message']);
-            throw new \Exception($messageException);
+            $result['message'] = $this->translator->trans('No se han podido obtener usuarios');
+            return $result;
         }
 
         $user = $userResponse['data'];
@@ -251,5 +248,39 @@ class UserManagerService
         $currentPass = $userResponse['data'];
 
         return $currentPass;
+    }
+
+
+
+    public function deleteUser($id, $form)
+    {
+        $result = array(
+            'status'        => false,
+            'statusCode'    => 401,
+            'message'       => $this->translator->trans('No se ha podido realizar la acción'),
+            'data'          => array()
+        );
+
+        $userResponse = $this->getUser($id);
+
+        if ($userResponse['status'] == false) {
+            $result['message'] = $this->translator->trans('No se han podido obtener usuarios');
+            return $result;
+        }
+
+        $user = $userResponse['data'];
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $this->em->remove($user);
+            $this->em->flush();
+
+            return array(
+                'status'        => true,
+                'statusCode'    => 200,
+                'message'       => $this->translator->trans('Usuario eliminado correctamnte'),
+                'data'          => array()
+            );
+        }
     }
 }

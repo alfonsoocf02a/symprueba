@@ -37,6 +37,8 @@
 
         // Define la base de la URL y las traducciones necesarias
         var baseUrlEdit = "{{ path('emm_user_edit', {'id': 'PLACEHOLDER'}) }}";
+        var baseUrlview = "{{ path('emm_user_view', {'id': 'PLACEHOLDER'}) }}";
+        var baseUrlDelete = "{{ path('emm_user_delete', {'id': 'PLACEHOLDER'}) }}";
 
         $(document).ready(function() {
             $('#usersTable').DataTable({
@@ -107,8 +109,10 @@
                             
                             // Reemplaza 'full.id' por el campo adecuado si es necesario.
                             var editUrl = baseUrlEdit.replace("PLACEHOLDER", full.id);
+                            var viewUrl = baseUrlview.replace("PLACEHOLDER", full.id);
+                            var deleteUrl = baseUrlDelete.replace("PLACEHOLDER", full.id);
 
-                            return generateActionButtons(editUrl);
+                            return generateActionButtons(editUrl, viewUrl, deleteUrl);
                         }
                     }
                 ],
@@ -118,11 +122,11 @@
             });
         });
 
-        function generateActionButtons(editUrl) {
+        function generateActionButtons(editUrl, viewUrl, deleteUrl) {
             // Construye y retorna la cadena HTML para los botones de acción
-            return "<a href='#' class='btn btn-sm btn-info'>View</a>" + 
-                "<a href='" + editUrl + "' class='btn btn-sm btn-primary'>Edit</a>" + 
-                "<a href='#' class='btn btn-sm btn-danger btn-delete'>Delete</a>";
+            return "<a href='" + viewUrl + "' class='btn btn-sm btn-info'>View</a> " + 
+                "<a href='" + editUrl + "' class='btn btn-sm btn-primary'>Edit</a> " + 
+                "<a href='" + deleteUrl + "' class='btn btn-sm btn-danger btn-delete'>Delete</a> ";
         }
 
     </script>

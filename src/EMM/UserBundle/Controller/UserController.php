@@ -155,7 +155,33 @@ class UserController extends Controller
     public function updateAction($id, Request $request)
     {
 
+        $userManager = $this->get('emm.user_bundle.user_manager_service');
+        $userResponse = $userManager->getUser($id);
 
+        if ($userResponse['status'] == false) {
+            throw $this->createNotFoundException($userResponse['message']);
+        }
+
+        //Obtenemos los datos de la respuesta del formulario recibodo
+        $form = $this->createEditForm($userResponse['data'])->handleRequest($request);
+
+        try {
+            $ResponseGeneral = $userManager->updateUser($id, $form);
+        } catch (\Throwable $th) {
+            throw new \Exception("Error haciendo la actualización");
+        }
+
+        if ($ResponseGeneral['status'] == true) {
+            $this->addFlash('mensaje', $ResponseGeneral['message']);
+            return $this->redirectToRoute('emm_user_index', array('id' => $userResponse['data']->getId()));
+        }
+        return $this->render('EMMUserBundle:User:edit.html.twig', array('user' => $userResponse['data'], 'form' => $form->createView()));
+    }
+
+    public function viewAction($id)
+    {
+
+        //Obtenemos el usuario
         $userManager = $this->get('emm.user_bundle.user_manager_service');
         $userResponse = $userManager->getUser($id);
 
@@ -166,20 +192,42 @@ class UserController extends Controller
 
         $user = $userResponse['data'];
 
+        $deleteForm = $this->createDeleteForm($user);
+
+        return $this->render('EMMUserBundle:User:view.html.twig', array('user' => $user, 'delete_form' => $deleteForm->createView()));
+    }
+
+    private function createDeleteForm($user)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('emm_user_delete', array('id' => $user->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+    }
+
+    public function deleteAction(Request $request, $id)
+    {
+        //Obtenemos el usuario
+        $userManager = $this->get('emm.user_bundle.user_manager_service');
+        $userResponse = $userManager->getUser($id);
+
+        if ($userResponse['status'] == false) {
+            $messageException = json_encode($userResponse['message']);
+            throw $this->createNotFoundException($messageException);
+        }
+
         //Obtenemos los datos de la respuesta del formulario recibodo
-        $form = $this->createEditForm($user);
-        $form->handleRequest($request);
+        $form = $this->createDeleteForm($userResponse['data'])->handleRequest($request);
 
         try {
-            $ResponseGeneral = $userManager->updateUser($id, $form);
+            $ResponseGeneral = $userManager->deleteUser($id, $form);
         } catch (\Throwable $th) {
-            throw new \Exception("Error haciendo la actualización");
+            throw new \Exception("Error eliminando el usuario");
         }
 
-        if ($ResponseGeneral['status'] == true) {
-            $this->addFlash('mensaje', $ResponseGeneral['message']);
-            return $this->redirectToRoute('emm_user_index', array('id' => $user->getId()));
-        }
-        return $this->render('EMMUserBundle:User:edit.html.twig', array('user' => $user, 'form' => $form->createView()));
+        //mostramos el resultado
+
+        $this->addFlash('mensaje', $ResponseGeneral['message']);
+        return $this->redirectToRoute('emm_user_index');
     }
 }

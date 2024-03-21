@@ -1,0 +1,25 @@
+{{ form_start(form) }}
+
+    {{ form_widget(form) }}
+
+    <input type="submit" value="{{ 'Delete user'|trans }}" class="btn btn-lg btn-block btn-danger" onclick="confirmDelete(event)" >
+
+{{ form_end(form) }}
+
+<script>
+    var message = '{{ message }}';
+    
+    function confirmDelete(event)
+    {
+        event.preventDefault(); // Detiene el envío del formulario
+        var form = event.target.form; // Obtiene el formulario al que pertenece el botón
+        
+        bootbox.confirm(message, function(result) {
+            if(result == true)
+            {
+                form.submit(); // Envía el formulario manualmente
+            }
+        });
+    }
+
+</script>
