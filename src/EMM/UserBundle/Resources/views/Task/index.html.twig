@@ -33,6 +33,8 @@
     {{ parent() }}
     <script>
 
+    var baseUrlView = "{{ path('emm_task_view', {'id': 'PLACEHOLDER'}) }}";
+
 $(document).ready(function() {
     $('#tasksTable').DataTable({
         dom: 'Blfrtip',
@@ -83,7 +85,14 @@ $(document).ready(function() {
             }
         },
         columns: [
-            { data: 'title', name: 't.title' },
+            { 
+                data: 'title', 
+                name: 't.title',
+                render: function(data, type, full, meta) {
+                    var viewUrl = baseUrlView.replace('PLACEHOLDER', full.id);
+                    return '<a href="' + viewUrl + '">' + data + '</a>';
+                }
+            },
             { data: 'createdAt', name: 't.createdAt' },
             { data: 'user', name: 'u.username' },
             {

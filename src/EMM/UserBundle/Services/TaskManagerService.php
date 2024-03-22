@@ -43,7 +43,8 @@ class TaskManagerService
             1 => 't.createdAt',
             2 => 'u.username',
             3 => 't.status',
-            4 => 't.description'
+            4 => 't.description',
+            5 => 't.id'
         ];
 
         $orderColumnIndex = $params['order'][0]['column'] ?? 0;
@@ -65,6 +66,7 @@ class TaskManagerService
         // Mapeo de resultados a formato adecuado para DataTables
         $data = array_map(function ($task) {
             return [
+                'id' => $task->getId(),
                 'title' => $task->getTitle(),
                 'createdAt' => $task->getCreatedAt()->format('Y-m-d H:i:s'),
                 'user' => $task->getUser()->getUsername(),
