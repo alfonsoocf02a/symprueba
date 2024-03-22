@@ -112,4 +112,93 @@ class TaskManagerService
             'data'          => array()
         );
     }
+
+    public function getTask($id)
+    {
+
+        $result = array(
+            'status'        => false,
+            'statusCode'    => 401,
+            'message'       => $this->translator->trans('No se ha podido realizar la acción'),
+            'data'          => array()
+        );
+
+        try {
+            $task = $this->taskRepository->find($id);
+        } catch (\Throwable $th) {
+            $result['message'] = $this->translator->trans('Ha ocurrido un error');
+            return $result;
+        }
+
+        if (empty($task)) {
+            $result['message'] = $this->translator->trans('No se han podido obtener usuarios');
+            return $result;
+        }
+
+        return array(
+            'status'        => true,
+            'statusCode'    => 200,
+            'message'       => $this->translator->trans('Se ha realizado correctamente'),
+            'data'          => $task
+        );
+    }
+
+
+    public function updateTask(Task $task, $form)
+    {
+
+        $result = array(
+            'status'        => false,
+            'statusCode'    => 401,
+            'message'       => $this->translator->trans('No se ha podido actualizar la tarea'),
+            'data'          => array()
+        );
+
+
+        try {
+            if ($form->isValid()) {
+                $task->setStatus(0);
+                $task->setStatus(0);
+                $this->em->flush();
+            }
+        } catch (\Throwable $th) {
+            $result['message'] = $this->translator->trans('Error en la base de datos');
+            return $result;
+        }
+
+        return array(
+            'status'        => true,
+            'statusCode'    => 200,
+            'message'       => $this->translator->trans('Tarea actualizada correctamente'),
+            'data'          => array()
+        );
+    }
+
+
+    public function deleteTask(Task $task)
+    {
+
+        $result = array(
+            'status'        => false,
+            'statusCode'    => 401,
+            'message'       => $this->translator->trans('No se ha podido eliminar la tarea'),
+            'data'          => array()
+        );
+
+
+        try {
+            $this->em->remove($task);
+            $this->em->flush();
+        } catch (\Throwable $th) {
+            $result['message'] = $this->translator->trans('Error en la base de datos');
+            return $result;
+        }
+
+        return array(
+            'status'        => true,
+            'statusCode'    => 200,
+            'message'       => $this->translator->trans('Tarea eliminada correctamente'),
+            'data'          => array()
+        );
+    }
 }

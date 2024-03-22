@@ -80,11 +80,17 @@ class TaskController extends Controller
 
     public function viewAction($id)
     {
-        $task = $this->getDoctrine()->getRepository('EMMUserBundle:Task')->find($id);
 
-        if (!$task) {
-            throw $this->createNotFoundException('The task does not exist.');
+        $taskManager = $this->get('emm.user_bundle.task_manager_service');
+
+        $taskResponse = $taskManager->getTask($id);
+
+        if ($taskResponse['status'] == false) {
+            $messageException = json_encode($taskResponse['message']);
+            throw $this->createNotFoundException($messageException);
         }
+
+        $task = $taskResponse['data'];
 
         $deleteForm = $this->createCustomForm($task->getId(), 'DELETE', 'emm_task_delete');
 
@@ -95,13 +101,16 @@ class TaskController extends Controller
 
     public function editAction($id)
     {
-        $em = $this->getDoctrine()->getManager();
+        $taskManager = $this->get('emm.user_bundle.task_manager_service');
 
-        $task = $em->getRepository('EMMUserBundle:Task')->find($id);
+        $taskResponse = $taskManager->getTask($id);
 
-        if (!$task) {
-            throw $this->createNotFoundException('task not found');
+        if ($taskResponse['status'] == false) {
+            $messageException = json_encode($taskResponse['message']);
+            throw $this->createNotFoundException($messageException);
         }
+
+        $task = $taskResponse['data'];
 
         $form = $this->createEditForm($task);
 
@@ -120,48 +129,53 @@ class TaskController extends Controller
 
     public function updateAction($id, Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
+        $taskManager = $this->get('emm.user_bundle.task_manager_service');
 
-        $task = $em->getRepository('EMMUserBundle:Task')->find($id);
+        $taskResponse = $taskManager->getTask($id);
 
-        if (!$task) {
-            throw $this->createNotFoundException('task not found');
+        if ($taskResponse['status'] == false) {
+            $messageException = json_encode($taskResponse['message']);
+            throw $this->createNotFoundException($messageException);
         }
+
+        $task = $taskResponse['data'];
 
         $form = $this->createEditForm($task);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() and $form->isValid()) {
-            $task->setStatus(0);
-            $em->flush();
-            $this->addFlash('mensaje', 'The task has been modified');
-            return $this->redirectToRoute('emm_task_edit', array('id' => $task->getId()));
+        $taskResponse = $taskManager->createTask($task, $form);
+
+        if ($taskResponse['status'] == false) {
+            $this->addFlash('mensaje', $taskResponse['message']);
+            return $this->render('EMMUserBundle:Task:edit.html.twig', array('task' => $task, 'form' => $form->createView()));
         }
 
-        return $this->render('EMMUserBundle:Task:edit.html.twig', array('task' => $task, 'form' => $form->createView()));
+        $this->addFlash('mensaje', 'The task has been modified');
+        return $this->redirectToRoute('emm_task_edit', array('id' => $task->getId()));
     }
 
-    public function deleteAction(Request $request, $id)
+    public function deleteAction($id)
     {
-        $em = $this->getDoctrine()->getManager();
+        $taskManager = $this->get('emm.user_bundle.task_manager_service');
 
-        $task = $em->getRepository('EMMUserBundle:Task')->find($id);
+        $taskResponse = $taskManager->getTask($id);
 
-        if (!$task) {
-            throw $this->createNotFoundException('task not found');
+        if ($taskResponse['status'] == false) {
+            $messageException = json_encode($taskResponse['message']);
+            throw $this->createNotFoundException($messageException);
         }
 
-        $form = $this->createCustomForm($task->getId(), 'DELETE', 'emm_task_delete');
-        $form->handleRequest($request);
+        $task = $taskResponse['data'];
 
-        if ($form->isSubmitted() and $form->isValid()) {
-            $em->remove($task);
-            $em->flush();
+        $taskResponse = $taskManager->deleteTask($task);
 
-            $this->addFlash('mensaje', 'The task has been deleted');
-
-            return $this->redirectToRoute('emm_task_index');
+        if ($taskResponse['status'] == false) {
+            $this->addFlash('mensaje', $taskResponse['message']);
         }
+
+        $this->addFlash('mensaje', 'The task has been deleted');
+
+        return $this->redirectToRoute('emm_task_index');
     }
 
     private function createCustomForm($id, $method, $route)
