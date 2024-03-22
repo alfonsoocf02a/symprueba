@@ -7,24 +7,38 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use EMM\UserBundle\Entity\Task;
 use EMM\UserBundle\Form\TaskType;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use EMM\UserBundle\Entity\User;
+use EMM\UserBundle\Form\UserType;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Form\FormError;
+use Doctrine\ORM\EntityManager;
+
 
 class TaskController extends Controller
 {
-    public function indexAction(Request $request)
+
+    public function renderindexAction(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
-        $dql = "SELECT t FROM EMMUserBundle:Task t ORDER BY t.id DESC";
-        $tasks = $em->createQuery($dql);
-
-        $paginator = $this->get('knp_paginator');
-        $pagination = $paginator->paginate(
-            $tasks,
-            $request->query->getInt('page', 1),
-            3
-        );
-
-        return $this->render('EMMUserBundle:Task:index.html.twig', array('pagination' => $pagination));
+        return $this->render('EMMUserBundle:Task:index.html.twig');
     }
+
+    public function indexDataAction(Request $request)
+    {
+        $taskManager = $this->get('emm.user_bundle.task_manager_service');
+
+        // Accediendo a todos los parámetros de DataTables enviados vía POST
+        $params = $request->request->all();
+
+        // Suponiendo que los filtros forman parte de los parámetros
+        // Si tienes un mecanismo de filtrado personalizado, ajusta según sea necesario
+        $form_filters = isset($params['form_filters']) ? $params['form_filters'] : [];
+
+        $tasks = $taskManager->findTasks($params, $form_filters);
+
+        return new JsonResponse($tasks);
+    }
+
 
     public function addAction()
     {

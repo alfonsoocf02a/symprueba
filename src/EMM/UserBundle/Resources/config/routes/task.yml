@@ -1,6 +1,11 @@
 emm_task_index:
     path:     /index
-    defaults: { _controller: EMMUserBundle:Task:index }
+    defaults: { _controller: EMMUserBundle:Task:renderindex }
+
+emm_task_index_data:
+    path:       /indexData
+    defaults: { _controller: EMMUserBundle:Task:indexData }
+    condition:  "request.isXmlHttpRequest()"
 
 emm_task_add:
     path:     /add

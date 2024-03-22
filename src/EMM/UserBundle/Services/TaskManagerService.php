@@ -21,6 +21,66 @@ class TaskManagerService
     }
 
 
+    public function findTasks(array $params, array $form_filters)
+    {
+        $queryBuilder = $this->taskRepository->createQueryBuilder('t')
+            ->join('t.user', 'u');
+
+        // Aplicar Filtros
+        if (!empty($form_filters)) {
+            foreach ($form_filters as $field => $value) {
+                if (!empty($value)) {
+                    // Supongamos que $form_filters contiene filtros directamente relacionados con los campos
+                    $queryBuilder->andWhere("u.$field LIKE :$field")
+                        ->setParameter($field, '%' . $value . '%');
+                }
+            }
+        }
+
+        // Ordenación
+        $columns = [
+            0 => 't.title',
+            1 => 't.createdAt',
+            2 => 'u.username',
+            3 => 't.status',
+            4 => 't.description'
+        ];
+
+        $orderColumnIndex = $params['order'][0]['column'] ?? 0;
+        $orderDir = $params['order'][0]['dir'] ?? 'asc';
+        $queryBuilder->orderBy($columns[$orderColumnIndex], $orderDir);
+
+        // Paginación
+        $start = $params['start'] ?? 0;
+        $length = $params['length'] ?? 10;
+        $queryBuilder->setFirstResult($start)
+            ->setMaxResults($length);
+
+        $query = $queryBuilder->getQuery();
+        $paginator = new \Doctrine\ORM\Tools\Pagination\Paginator($query, $fetchJoinCollection = true);
+
+        $totalData = count($this->taskRepository->findAll());
+        $totalFiltered = count($paginator);
+
+        // Mapeo de resultados a formato adecuado para DataTables
+        $data = array_map(function ($task) {
+            return [
+                'title' => $task->getTitle(),
+                'createdAt' => $task->getCreatedAt()->format('Y-m-d H:i:s'),
+                'user' => $task->getUser()->getUsername(),
+                'status' => $task->getStatus(),
+                'description' => $task->getDescription(),
+            ];
+        }, iterator_to_array($paginator));
+
+        return [
+            'draw' => intval($params['draw']),
+            'recordsTotal' => $totalData,
+            'recordsFiltered' => $totalFiltered, // Aquí necesitarás un método para calcular esto si aplicas filtros
+            'data' => $data,
+        ];
+    }
+
     public function createTask(Task $task, $form)
     {
 
