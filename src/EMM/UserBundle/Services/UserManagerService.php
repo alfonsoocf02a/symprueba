@@ -114,6 +114,7 @@ class UserManagerService
      */
     public function saveUser(User $user)
     {
+        
         $this->em->persist($user);
 
         // Hacer que el flush solo se haga al final de todo para evitar

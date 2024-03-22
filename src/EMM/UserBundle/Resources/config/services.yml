@@ -2,3 +2,11 @@ services:
 #    emm_user.example:
 #        class: EMM\UserBundle\Example
 #        arguments: ["@service_id", "plain_value", "%parameter%"]
+
+    emm.user_bundle.user_manager_service:
+        class: EMM\UserBundle\Services\UserManagerService
+        arguments: ['@doctrine.orm.entity_manager', '@translator', '@security.password_encoder']
+
+    emm.user_bundle.task_manager_service:
+        class: EMM\UserBundle\Services\TaskManagerService
+        arguments: ['@doctrine.orm.entity_manager', '@translator']
