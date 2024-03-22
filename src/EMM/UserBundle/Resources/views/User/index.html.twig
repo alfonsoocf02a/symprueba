@@ -40,87 +40,78 @@
         var baseUrlview = "{{ path('emm_user_view', {'id': 'PLACEHOLDER'}) }}";
         var baseUrlDelete = "{{ path('emm_user_delete', {'id': 'PLACEHOLDER'}) }}";
 
-        $(document).ready(function() {
-            $('#usersTable').DataTable({
-                dom: 'Blrtip',
-                order: [[0, 'asc']],
-                searching: false,
-                lengthMenu: [[5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, "{{ 'Todos'|trans }}"]],
-                buttons: [
-                    {
-                        extend: 'excelHtml5',
-                    },
-                    {
-                        extend: 'pdfHtml5',
-                        orientation: 'landscape',
-                        pageSize: 'LEGAL',
-                    },
-                ],
-                rowId: 'idRow',
-                responsive: true,
-                autoWidth: true,
-                processing: true,
-                serverSide: true,
-                pagingType: "full_numbers",
-                language: {
-                    sProcessing: "{{ 'Procesando...'|trans }}",
-                    sLengthMenu: "{{ 'Mostrar _MENU_ registros'|trans }}",
-                    sZeroRecords: "{{ 'No se encontraron resultados'|trans }}",
-                    sEmptyTable: "{{ 'Ningún dato disponible en esta tabla'|trans }}",
-                    sInfo: "{{ 'Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros'|trans }}",
-                    sInfoEmpty: "{{ 'Mostrando registros del 0 al 0 de un total de 0 registros'|trans }}",
-                    sInfoFiltered: "{{ '(filtrado de un total de _MAX_ registros)'|trans }}",
-                    sSearch: "{{ 'Buscar:'|trans }}",
-                    oPaginate: {
-                        sFirst: "{{ 'Primero'|trans }}",
-                        sLast: "{{ 'Último'|trans }}",
-                        sNext: "{{ 'Siguiente'|trans }}",
-                        sPrevious: "{{ 'Anterior'|trans }}",
-                    },
-                    oAria: {
-                        sSortAscending: "{{ ': Activar para ordenar la columna de manera ascendente'|trans }}",
-                        sSortDescending: "{{ ': Activar para ordenar la columna de manera descendente'|trans }}"
-                    },
-                },
-                ajax: {
-                    url: "{{ path('emm_user_index_data') }}",
-                    method: 'POST',
-                    data: function (d) {
-                        // Aquí puedes añadir datos adicionales si es necesario
-                    }
-                },
-                columns: [
-                    { data: 'username' },
-                    { data: 'firstName' },
-                    { data: 'lastName' },
-                    { data: 'email' },
-                    { data: 'role' },
-                    { data: 'createdAt' },
-                    { data: 'updatedAt' },
-                    // Las acciones no se pasan por AJAX, se renderizan en el servidor o en un método 'render' aquí.
-                    {
-                        data: 'actions',
-                        orderable: false,
-                        searchable: false,
-                        render: function(data, type, full, meta) {
-                            // Asegúrate de que la base URL está definida en algún lugar accesible del script.
-                            // Por ejemplo, definida globalmente o dentro de este bloque de script.
-                            // FULL CONTIENE TODOS LOS DATOS DE LAFINAL
-                            
-                            // Reemplaza 'full.id' por el campo adecuado si es necesario.
-                            var editUrl = baseUrlEdit.replace("PLACEHOLDER", full.id);
-                            var viewUrl = baseUrlview.replace("PLACEHOLDER", full.id);
-                            var deleteUrl = baseUrlDelete.replace("PLACEHOLDER", full.id);
+$(document).ready(function() {
+    $('#usersTable').DataTable({
+        dom: 'Blfrtip',
+        order: [[0, 'asc']],
+        searching: true,
+        lengthMenu: [[5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, "{{ 'Todos'|trans }}"]],
+        buttons: [
+            {
+                extend: 'excelHtml5',
+            },
+            {
+                extend: 'pdfHtml5',
+                orientation: 'landscape',
+                pageSize: 'LEGAL',
+            },
+        ],
+        rowId: 'idRow',
+        responsive: true,
+        autoWidth: true,
+        processing: true,
+        serverSide: true,
+        pagingType: "full_numbers",
+        language: {
+            sProcessing: "{{ 'Procesando...'|trans }}",
+            sLengthMenu: "{{ 'Mostrar _MENU_ registros'|trans }}",
+            sZeroRecords: "{{ 'No se encontraron resultados'|trans }}",
+            sEmptyTable: "{{ 'Ningún dato disponible en esta tabla'|trans }}",
+            sInfo: "{{ 'Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros'|trans }}",
+            sInfoEmpty: "{{ 'Mostrando registros del 0 al 0 de un total de 0 registros'|trans }}",
+            sInfoFiltered: "{{ '(filtrado de un total de _MAX_ registros)'|trans }}",
+            sSearch: "{{ 'Buscar:'|trans }}",
+            oPaginate: {
+                sFirst: "{{ 'Primero'|trans }}",
+                sLast: "{{ 'Último'|trans }}",
+                sNext: "{{ 'Siguiente'|trans }}",
+                sPrevious: "{{ 'Anterior'|trans }}",
+            },
+            oAria: {
+                sSortAscending: "{{ ': Activar para ordenar la columna de manera ascendente'|trans }}",
+                sSortDescending: "{{ ': Activar para ordenar la columna de manera descendente'|trans }}"
+            },
+        },
+        ajax: {
+            url: "{{ path('emm_user_index_data') }}",
+            method: 'POST',
+            data: function (d) {
+                // Aquí puedes añadir datos adicionales si es necesario
+            }
+        },
+        columns: [
+            { data: 'username' },
+            { data: 'firstName' },
+            { data: 'lastName' },
+            { data: 'email' },
+            { data: 'role' },
+            { data: 'createdAt' },
+            { data: 'updatedAt' },
+            {
+                data: 'actions',
+                orderable: false,
+                searchable: true,
+                render: function(data, type, full, meta) {
+                    var editUrl = baseUrlEdit.replace("PLACEHOLDER", full.id);
+                    var viewUrl = baseUrlview.replace("PLACEHOLDER", full.id);
+                    var deleteUrl = baseUrlDelete.replace("PLACEHOLDER", full.id);
 
-                            return generateActionButtons(editUrl, viewUrl, deleteUrl);
-                        }
-                    }
-                ],
-                initComplete: function () {
-                    // Aquí puedes escribir código que se ejecutará una vez que la tabla haya terminado de cargarse
+                    return generateActionButtons(editUrl, viewUrl, deleteUrl);
                 }
-            });
-        });
+            }
+        ]
+    });
+});
 
         function generateActionButtons(editUrl, viewUrl, deleteUrl) {
             // Construye y retorna la cadena HTML para los botones de acción

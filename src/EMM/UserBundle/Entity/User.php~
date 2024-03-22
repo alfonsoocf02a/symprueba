@@ -364,38 +364,4 @@ class User implements UserInterface
     public function eraseCredentials()
     {
     }
-
-    /**
-     * Add task
-     *
-     * @param \EMM\UserBundle\Entity\Task $task
-     *
-     * @return User
-     */
-    public function addTask(\EMM\UserBundle\Entity\Task $task)
-    {
-        $this->tasks[] = $task;
-
-        return $this;
-    }
-
-    /**
-     * Remove task
-     *
-     * @param \EMM\UserBundle\Entity\Task $task
-     */
-    public function removeTask(\EMM\UserBundle\Entity\Task $task)
-    {
-        $this->tasks->removeElement($task);
-    }
-
-    /**
-     * Get tasks
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getTasks()
-    {
-        return $this->tasks;
-    }
 }

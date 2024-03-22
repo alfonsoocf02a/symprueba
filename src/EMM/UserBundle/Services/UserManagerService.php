@@ -37,7 +37,7 @@ class UserManagerService
      * @author Alfonso
      */
     // UserManagerService.php
-    public function findInActiveUsers($params, $form_filters)
+    public function findInActiveUsers(array $params, array $form_filters)
     {
         $queryBuilder = $this->userRepository->createQueryBuilder('u');
 
@@ -270,17 +270,19 @@ class UserManagerService
 
         $user = $userResponse['data'];
 
-        if ($form->isSubmitted() && $form->isValid()) {
-
+        try {
             $this->em->remove($user);
             $this->em->flush();
-
-            return array(
-                'status'        => true,
-                'statusCode'    => 200,
-                'message'       => $this->translator->trans('Usuario eliminado correctamnte'),
-                'data'          => array()
-            );
+        } catch (\Throwable $th) {
+            $result['message'] = $this->translator->trans('Error en la base de datos');
+            return $result;
         }
+
+        return array(
+            'status'        => true,
+            'statusCode'    => 200,
+            'message'       => $this->translator->trans('Usuario eliminado correctamnte'),
+            'data'          => array()
+        );
     }
 }

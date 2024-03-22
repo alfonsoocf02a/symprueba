@@ -1,3 +1,7 @@
-emm_user_homepage:
-    path:     /
-    defaults: { _controller: EMMUserBundle:Default:index }
+emm_user_user:
+    resource: "@EMMUserBundle/Resources/config/routes/user.yml"
+    prefix:   /user
+
+emm_task_task:
+    resource: "@EMMUserBundle/Resources/config/routes/task.yml"
+    prefix:   /task
