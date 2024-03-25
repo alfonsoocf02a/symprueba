@@ -20,6 +20,12 @@ class UserController extends Controller
      */
     // UserController.php
 
+
+    public function homeAction()
+    {
+        return $this->render("EMMUserBundle:User:home.html.twig");
+    }
+
     public function renderindexAction(Request $request)
     {
         return $this->render('EMMUserBundle:User:index.html.twig');

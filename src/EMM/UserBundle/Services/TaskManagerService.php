@@ -13,6 +13,14 @@ class TaskManagerService
     private $taskRepository;
     private $translator;
 
+    /**
+     * Inicializa el constructor
+     * @param EntityManager $em       Entity manager
+     * @param $translator             Traductor
+     * 
+     * @return void
+     * @author Alfonso
+     */
     public function __construct(EntityManager $em, $translator)
     {
         $this->em = $em;
@@ -21,6 +29,14 @@ class TaskManagerService
     }
 
 
+    /**
+     * Busca todoas las tareas para visualizarlas con el Datatables
+     * @param array $params             Parametros    
+     * @param array $form_filters       Filtros
+     * 
+     * @return array
+     * @author Alfonso
+     */
     public function findTasks(array $params, array $form_filters)
     {
         $queryBuilder = $this->taskRepository->createQueryBuilder('t')
@@ -113,7 +129,7 @@ class TaskManagerService
         );
     }
 
-    public function getTask($id)
+    public function getTask(int $id)
     {
 
         $result = array(

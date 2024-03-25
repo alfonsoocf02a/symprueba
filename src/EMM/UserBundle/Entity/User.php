@@ -7,6 +7,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 
 
 /**
@@ -18,7 +19,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @UniqueEntity("email")
  * @ORM\HasLifecycleCallbacks()
  */
-class User implements UserInterface
+class User implements AdvancedUserInterface, \Serializable
 {
 
     /**
@@ -108,6 +109,7 @@ class User implements UserInterface
     public function __construct()
     {
         $this->tasks = new ArrayCollection();
+        $this->isActive = true;
     }
 
     /**
@@ -355,10 +357,12 @@ class User implements UserInterface
 
     public function getRoles()
     {
+        return array($this->role);
     }
 
     public function getSalt()
     {
+        return null;
     }
 
     public function eraseCredentials()
@@ -403,4 +407,50 @@ class User implements UserInterface
     {
         return $this->firstName . " " . $this->lastName;
     }
+
+
+
+    /** @see \Serializable::serialize() */
+    public function serialize()
+    {
+        return serialize(array(
+            $this->id,
+            $this->username,
+            $this->password,
+            $this->isActive
+        ));
+    }
+
+    /** @see \Serializable::unserialize() */
+    public function unserialize($serialized)
+    {
+        list(
+            $this->id,
+            $this->username,
+            $this->password,
+            $this->isActive
+        ) = unserialize($serialized);
+    }
+
+    public function isAccountNonExpired()
+    {
+        return true;
+    }
+
+    public function isAccountNonLocked()
+    {
+        return true;
+    }
+
+    public function isCredentialsNonExpired()
+    {
+        return true;
+    }
+
+    public function isEnabled()
+    {
+        return $this->isActive;
+    }
+
+
 }
