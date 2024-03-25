@@ -43,7 +43,12 @@ emm_task_redirect_add:
 
 emm_task_custom:
     path:     /custom
-    defaults: { _controller: EMMUserBundle:Task:custom }
+    defaults: { _controller: EMMUserBundle:Task:rendercustom }
+
+emm_task_custom_data:
+    path:       /customData
+    defaults: { _controller: EMMUserBundle:Task:customData }
+    condition:  "request.isXmlHttpRequest()"
 
 emm_task_process:
     path:     /process/{id}

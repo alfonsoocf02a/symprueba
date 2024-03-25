@@ -1,0 +1,126 @@
+{% extends 'layout.html.twig' %}
+
+{% block body %}
+    {{ parent() }}
+
+	{{ include('EMMUserBundle:Task:messages/success.html.twig') }}
+	{{ include('EMMUserBundle:Task:messages/warning.html.twig') }}
+
+    <div class="container">
+        <div class="col-md-12">
+            <div class="page-header margin-none">
+                <h2 class="padding-none">Tasks</h2>
+            </div>
+            <div class="table-responsive">
+                <table id="tasksTable" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Date</th>
+                            <th>User</th>
+                            <th>Status</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Las filas de la tabla serán llenadas por DataTables -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+
+    var baseUrlView = "{{ path('emm_task_view', {'id': 'PLACEHOLDER'}) }}";
+
+$(document).ready(function() {
+    $('#tasksTable').DataTable({
+        dom: 'Blfrtip',
+        order: [[0, 'asc']],
+        searching: true,
+        lengthMenu: [[5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, "{{ 'Todos'|trans }}"]],
+        buttons: [
+            {
+                extend: 'excelHtml5',
+            },
+            {
+                extend: 'pdfHtml5',
+                orientation: 'landscape',
+                pageSize: 'LEGAL',
+            },
+        ],
+        rowId: 'idRow',
+        responsive: true,
+        autoWidth: true,
+        processing: true,
+        serverSide: true,
+        pagingType: "full_numbers",
+        language: {
+            sProcessing: "{{ 'Procesando...'|trans }}",
+            sLengthMenu: "{{ 'Mostrar _MENU_ registros'|trans }}",
+            sZeroRecords: "{{ 'No se encontraron resultados'|trans }}",
+            sEmptyTable: "{{ 'Ningún dato disponible en esta tabla'|trans }}",
+            sInfo: "{{ 'Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros'|trans }}",
+            sInfoEmpty: "{{ 'Mostrando registros del 0 al 0 de un total de 0 registros'|trans }}",
+            sInfoFiltered: "{{ '(filtrado de un total de _MAX_ registros)'|trans }}",
+            sSearch: "{{ 'Buscar:'|trans }}",
+            oPaginate: {
+                sFirst: "{{ 'Primero'|trans }}",
+                sLast: "{{ 'Último'|trans }}",
+                sNext: "{{ 'Siguiente'|trans }}",
+                sPrevious: "{{ 'Anterior'|trans }}",
+            },
+            oAria: {
+                sSortAscending: "{{ ': Activar para ordenar la columna de manera ascendente'|trans }}",
+                sSortDescending: "{{ ': Activar para ordenar la columna de manera descendente'|trans }}"
+            },
+        },
+        ajax: {
+            url: "{{ path('emm_task_custom_data') }}",
+            method: 'POST',
+            type: 'json',
+            data: function (d) {
+                // Aquí puedes añadir datos adicionales si es necesario
+            }
+        },
+        columns: [
+            { 
+                data: 'title', 
+                name: 't.title',
+                render: function(data, type, full, meta) {
+                    var viewUrl = baseUrlView.replace('PLACEHOLDER', full.id);
+                    return '<a href="' + viewUrl + '">' + data + '</a>';
+                }
+            },
+            { data: 'created_at', name: 't.created_at' },
+            { data: 'username', name: 'u.username' },
+            {
+                data: 'status', 
+                name: 't.status',
+                render: function(data, type, full, meta) {
+                    
+                    var color = data === true ? 'green' : 'red';
+                    return '<div style="text-align: center;"><span style="height: 15px; width: 15px; background-color: ' + color + '; border-radius: 50%; display: inline-block;"></span></div>';
+
+                }
+            },
+            { data: 'description', orderable: false, searchable: false },
+            {
+                data: 'actions',
+                orderable: false,
+                searchable: false,
+                render: function(data, type, full, meta) {
+                    return '';
+                }
+            }
+        ]
+    });
+});
+
+    </script>
+{% endblock %}

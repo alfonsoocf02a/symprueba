@@ -6,6 +6,7 @@ namespace EMM\UserBundle\Services;
 use Doctrine\ORM\EntityManager;
 use EMM\UserBundle\Entity\Task;
 use EMM\UserBundle\Entity\TaskRepository;
+use PDO;
 
 class TaskManagerService
 {
@@ -216,5 +217,94 @@ class TaskManagerService
             'message'       => $this->translator->trans('Tarea eliminada correctamente'),
             'data'          => array()
         );
+    }
+
+
+    public function findTasksUser(array $params)
+    {
+
+        $columns = [
+            0 => 't.title',
+            1 => 't.created_at',
+            2 => 'u.username',
+            3 => 't.status',
+            4 => 't.description',
+            5 => 't.id'
+        ];
+
+        $parameters = array();
+        $where = $query = $queryCount = $orderBy = $groupBy = $having = "";
+
+        $queryCount = "SELECT COUNT(id) AS 'total' FROM task";
+
+        $query = " SELECT
+            *
+            FROM task AS t 
+            JOIN users AS u ON u.id = t.user_id
+            WHERE 1 = 1
+        ";
+
+        $queryFilter = " SELECT 
+            COUNT(u.id) AS 'total' 
+            FROM task AS t 
+            JOIN users AS u ON u.id = t.user_id
+            WHERE 1 = 1
+        ";
+
+        if (!empty($params['id'])) {
+            $where .= ' AND t.user_id = :userId';
+            $parameters['userId'] = $params['id'];
+        }
+
+        if ($params['length'] != -1) {
+            $limit = "  LIMIT " . $params['start'] . " , " . $params['length'] . " ";
+        }
+
+        $orderBy .= " ORDER BY " . $columns[$params['order'][0]['column']] . "   " . $params['order'][0]['dir'] . $limit;
+
+        $totalRecord = $this->executeQuery($queryCount, $parameters);
+        $totalRecordFilter = $this->executeQuery($queryFilter, $parameters, $where);
+        $data = $this->executeQuery($query, $parameters, $where, $groupBy, $orderBy, $having);
+
+        // Si tenemos datos
+        if (is_null($data) || empty($data)) {
+            $data = "";
+        }
+
+        $result = array(
+            'draw'              => intval($params['draw']),
+            'recordsTotal'      => $totalRecord[0]['total'],
+            'recordsFiltered'   => $totalRecordFilter[0]['total'],
+            'data'              => $data
+        );
+
+        return $result;
+    }
+
+    public function executeQuery($query, $parameters, $where = null, $groupBy = null, $orderBy = null, $having = null)
+    {
+
+        $sqlConnection = $this->em->getConnection();
+
+        if (!is_null($where))
+            $query .= $where;
+
+        if (!is_null($groupBy))
+            $query .= $groupBy;
+
+        if (!is_null($having))
+            $query .= $having;
+
+        if (!is_null($orderBy))
+            $query .= $orderBy;
+
+        // Ejecutamos la consulta
+        $qr = $sqlConnection->prepare($query);
+        $qr->execute($parameters);
+
+        /** Resultado de la Query */
+        $result = $qr->fetchAll(PDO::FETCH_ASSOC);
+
+        return $result;
     }
 }

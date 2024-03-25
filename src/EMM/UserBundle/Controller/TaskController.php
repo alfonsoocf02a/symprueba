@@ -185,4 +185,82 @@ class TaskController extends Controller
             ->setMethod($method)
             ->getForm();
     }
+
+
+
+    public function rendercustomAction(Request $request)
+    {
+        return $this->render('EMMUserBundle:Task:custom.html.twig');
+    }
+
+    public function customDataAction(Request $request)
+    {
+        // Obtener el ID del usuario autenticado
+        $idUser = $this->get('security.token_storage')->getToken()->getUser()->getId();
+
+        // Accediendo a todos los parámetros de DataTables enviados vía POST
+        $params = $request->request->all();
+
+        // Agregar idUser y cualquier otro parámetro necesario directamente a $params
+        $params['id'] = $idUser;
+
+        // Suponiendo que los filtros forman parte de los parámetros
+        // Esto asegura que todos los parámetros necesarios están contenidos en una sola variable
+        if (isset($params['form_filters'])) {
+            foreach ($params['form_filters'] as $key => $value) {
+                $params[$key] = $value;
+            }
+        }
+
+        $taskManager = $this->get('emm.user_bundle.task_manager_service');
+        $tasks = $taskManager->findTasksUser($params);
+
+        return new JsonResponse($tasks);
+    }
+
+
+
+    public function processAction($id, Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $taskManager = $this->get('emm.user_bundle.task_manager_service');
+
+        $taskResponse = $taskManager->getTask($id);
+
+        if ($taskResponse['status'] == false) {
+            $messageException = json_encode($taskResponse['message']);
+            throw $this->createNotFoundException($messageException);
+        }
+
+        $task = $taskResponse['data'];
+
+        //FALTA PONER BIEN-...
+
+        $form = $this->createCustomForm($task->getId(), 'PUT', 'emm_task_process');
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($task->getStatus() == 0) {
+                $task->setStatus(1);
+                $em->flush();
+
+                if ($request->isXMLHttpRequest()) {
+                    return new Response(
+                        json_encode(array('processed' => 1)),
+                        200,
+                        array('Content-Type' => 'application/json')
+                    );
+                }
+            } else {
+                if ($request->isXMLHttpRequest()) {
+                    return new Response(
+                        json_encode(array('processed' => 0)),
+                        200,
+                        array('Content-Type' => 'application/json')
+                    );
+                }
+            }
+        }
+    }
 }
