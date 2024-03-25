@@ -62,3 +62,8 @@ emm_task_redirect_edit:
         _controller: EMMUserBundle:Task:edit
         path: /edit/{id}
         permanent: true
+
+emm_task_complete:
+    path:     /complete/{id}
+    defaults: { _controller: EMMUserBundle:Task:complete }
+    methods:  [GET]

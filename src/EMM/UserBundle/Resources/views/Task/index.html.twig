@@ -100,7 +100,7 @@ $(document).ready(function() {
                 name: 't.status',
                 render: function(data, type, full, meta) {
                     
-                    var color = data === true ? 'green' : 'red';
+                    var color = data == true ? 'green' : 'red';
                     return '<div style="text-align: center;"><span style="height: 15px; width: 15px; background-color: ' + color + '; border-radius: 50%; display: inline-block;"></span></div>';
 
                 }

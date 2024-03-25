@@ -56,3 +56,4 @@ security:
         - { path: ^/task/delete, roles: ROLE_ADMIN } 
         - { path: ^/task/custom, roles: ROLE_USER } 
         - { path: ^/task/process, roles: ROLE_USER }
+        - { path: ^/task/complete, roles: ROLE_USER }

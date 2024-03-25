@@ -219,11 +219,8 @@ class TaskController extends Controller
     }
 
 
-
-    public function processAction($id, Request $request)
+    public function completeAction($id)
     {
-        $em = $this->getDoctrine()->getManager();
-
         $taskManager = $this->get('emm.user_bundle.task_manager_service');
 
         $taskResponse = $taskManager->getTask($id);
@@ -235,32 +232,13 @@ class TaskController extends Controller
 
         $task = $taskResponse['data'];
 
-        //FALTA PONER BIEN-...
+        $taskResponse = $taskManager->completeTask($task);
 
-        $form = $this->createCustomForm($task->getId(), 'PUT', 'emm_task_process');
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            if ($task->getStatus() == 0) {
-                $task->setStatus(1);
-                $em->flush();
-
-                if ($request->isXMLHttpRequest()) {
-                    return new Response(
-                        json_encode(array('processed' => 1)),
-                        200,
-                        array('Content-Type' => 'application/json')
-                    );
-                }
-            } else {
-                if ($request->isXMLHttpRequest()) {
-                    return new Response(
-                        json_encode(array('processed' => 0)),
-                        200,
-                        array('Content-Type' => 'application/json')
-                    );
-                }
-            }
+        if ($taskResponse['status'] == false) {
+            $this->addFlash('mensaje', $taskResponse['message']);
         }
+
+        $this->addFlash('mensaje', 'The task has been completed');
+        return $this->redirectToRoute('emm_task_custom');
     }
 }

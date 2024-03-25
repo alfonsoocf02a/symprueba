@@ -34,9 +34,11 @@
 
 {% block javascripts %}
     {{ parent() }}
+    <script src="{{ asset('bundles/emmuser/js/task-process.js') }}"></script>
     <script>
 
     var baseUrlView = "{{ path('emm_task_view', {'id': 'PLACEHOLDER'}) }}";
+    var baseCompleteUrl = "{{ path('emm_task_complete', {'id': 'PLACEHOLDER'}) }}";
 
 $(document).ready(function() {
     $('#tasksTable').DataTable({
@@ -104,7 +106,7 @@ $(document).ready(function() {
                 name: 't.status',
                 render: function(data, type, full, meta) {
                     
-                    var color = data === true ? 'green' : 'red';
+                    var color = full.status == true ? 'green' : 'red';
                     return '<div style="text-align: center;"><span style="height: 15px; width: 15px; background-color: ' + color + '; border-radius: 50%; display: inline-block;"></span></div>';
 
                 }
@@ -115,7 +117,8 @@ $(document).ready(function() {
                 orderable: false,
                 searchable: false,
                 render: function(data, type, full, meta) {
-                    return '';
+                    var completeUrl = baseCompleteUrl.replace("PLACEHOLDER", full.id);
+                    return "<a href='" + completeUrl + "' class='btn btn-sm btn-success btn-process'>Completar</a> ";
                 }
             }
         ]

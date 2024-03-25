@@ -307,4 +307,32 @@ class TaskManagerService
 
         return $result;
     }
+
+
+    public function completeTask(Task $task)
+    {
+
+        $result = array(
+            'status'        => false,
+            'statusCode'    => 401,
+            'message'       => $this->translator->trans('No se ha podido actualizar la tarea'),
+            'data'          => array()
+        );
+
+
+        try {
+            $task->setStatus(1);
+            $this->em->flush();
+        } catch (\Throwable $th) {
+            $result['message'] = $this->translator->trans('Error en la base de datos');
+            return $result;
+        }
+
+        return array(
+            'status'        => true,
+            'statusCode'    => 200,
+            'message'       => $this->translator->trans('Tarea actualizada correctamente'),
+            'data'          => array()
+        );
+    }
 }
