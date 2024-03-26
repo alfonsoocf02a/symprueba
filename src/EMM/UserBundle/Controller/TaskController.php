@@ -96,7 +96,11 @@ class TaskController extends Controller
 
         $user = $task->getUser();
 
-        return $this->render('EMMUserBundle:Task:view.html.twig', array('task' => $task, 'user' => $user, 'delete_form' => $deleteForm->createView()));
+        return $this->render('EMMUserBundle:Task:view.html.twig', array(
+            'task' => $task,
+            'user' => $user,
+            'delete_form' => $deleteForm->createView()
+        ));
     }
 
     public function editAction($id)
