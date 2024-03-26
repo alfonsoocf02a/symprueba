@@ -6,7 +6,10 @@ emm_task_task:
     resource: "@EMMUserBundle/Resources/config/routes/task.yml"
     prefix:   /task
 
-
+emm_pokes_view:
+    path:     /pokes/view
+    defaults: { _controller: EMMUserBundle:User:viewpoke }
+    methods: [GET, POST, DELETE]
 # Autentication
 
 emm_user_homepage:

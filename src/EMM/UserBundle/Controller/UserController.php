@@ -236,4 +236,9 @@ class UserController extends Controller
         $this->addFlash('mensaje', $ResponseGeneral['message']);
         return $this->redirectToRoute('emm_user_index');
     }
+
+    public function viewpokeAction()
+    {
+        return $this->render("EMMUserBundle:User:pokeindex.html.twig");
+    }
 }

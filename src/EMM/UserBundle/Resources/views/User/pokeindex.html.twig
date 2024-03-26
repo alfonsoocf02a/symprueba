@@ -1,0 +1,104 @@
+{% extends 'layout.html.twig' %}
+
+{% block body %}
+	{{ parent() }}
+
+  <body>
+
+    <div class="div-style">
+      <h2>Llamada a API con AJAX</h2>
+        <div class="card" style="width: 18rem;">
+          <div class="card-body">
+            <h5 class="title">Resultados de la búsqueda</h5>
+            <p id="pokemon-info">Aquí aparecerá la info.</p>
+            <button id="buscar-pokemon" class="btn btn-info" type="button">Buscar Pokémon</button>
+          </div>
+        </div>
+    </div>
+
+  <body>
+
+  <style>
+      h1, .div-style{
+          padding: 15px;
+          margin-bottom: 15px;
+      }
+  </style>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+    
+    $(document).ready(function () {
+
+  $("#bor").click(function () {
+    $(".btn.btn-primary").hide();
+  });
+
+  $("#rec").click(function () {
+    $(".btn.btn-primary").show();
+  });
+
+  $("#col").click(function () {
+    $(".card-title, .card-subtitle, .card-text").css("color", "green");
+    $(".card-text").text("Hola");
+  });
+
+  $("#tam").click(function () {
+    $(".card-title, .card-subtitle, .card-text").css("font-size", "22px");
+  });
+
+  $("#buscar-pokemon").click(function () {
+    $.ajax({
+      url: 'https://pokeapi.co/api/v2/pokemon/ditto',
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) {
+        var contenido = `
+              <strong>Nombre:</strong> ${data.name}<br>
+              <strong>Altura:</strong> ${data.height}<br>
+              <strong>Peso:</strong> ${data.weight}<br>
+              <strong>Habilidades:</strong> ${data.abilities.map(ability => ability.ability.name).join(", ")}
+            `;
+        $("#pokemon-info").html(contenido);
+      },
+      error: function () {
+        alert("Error al cargar los datos.");
+      }
+    });
+  });
+
+  $("#buscar-pokemon-fe").click(function () {
+
+    fetch('https://pokeapi.co/api/v2/pokemon/ditto')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+        }
+        return response.json();
+      })
+      .then(data => {
+        var contenido = `
+                <strong>Nombre:</strong> ${data.name}<br>
+                <strong>Altura:</strong> ${data.height}<br>
+                <strong>Peso:</strong> ${data.weight}<br>
+                <strong>Habilidades:</strong> ${data.abilities.map(ability => ability.ability.name).join(", ")}
+              `;
+        $("#buscar-pokemon-fe").html(contenido);
+      })
+      .catch(error => {
+        console.error('There has been a problem with your fetch operation:', error);
+      });
+  });
+});
+
+    </script>
+
+{% endblock %}
+
+
+
+
